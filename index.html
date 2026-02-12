@@ -84,34 +84,14 @@
       font-size: 15px;
     }
 
-    .badge{
-      display:inline-flex;
-      gap:10px;
-      align-items:center;
-      font-size:13px;
-      padding: 8px 12px;
-      border-radius: 999px;
-      background: rgba(255, 255, 255, .65);
-      border: 1px solid rgba(255,255,255,.7);
-      margin-bottom: 14px;
-    }
-    .dot{
-      width:10px;height:10px;border-radius:50%;
-      background: var(--accent);
-      box-shadow: 0 0 0 6px rgba(255,61,110,.18);
-      animation:pulse 1.8s infinite;
-    }
-    @keyframes pulse{
-      0%,100%{transform:scale(1); opacity:1}
-      50%{transform:scale(1.15); opacity:.85}
+    .btnrow{
+      position: relative;
+      margin-top: 22px;
+      min-height: 120px;
+      display: block;
+      overflow: hidden; /* ważne: uciekające NIE nie wyjdzie poza arenę */
     }
 
-.btnrow{
-  position: relative;
-  margin-top: 22px;
-  min-height: 120px;
-  display: block; /* usuwamy flex */
-}
     .btn{
       border:0;
       border-radius: 16px;
@@ -121,45 +101,48 @@
       letter-spacing:.01em;
       cursor:pointer;
       transition: transform .18s ease, box-shadow .18s ease, filter .18s ease, opacity .35s ease;
-
       user-select:none;
       position:relative;
-      line-height: 1;            /* kluczowe */
-      display: inline-flex;      /* lepsze układanie tekstu+emoji */
+      line-height: 1;
+      display: inline-flex;
       align-items: center;
       justify-content: center;
       gap: 8px;
-      
+      white-space: nowrap;
     }
     .btn:active{transform: translateY(1px) scale(.99)}
+
     .btn-yes{
       background: linear-gradient(135deg, var(--accent), #ff7aa5);
       color:white;
       box-shadow: 0 14px 34px rgba(255,61,110,.28);
     }
     .btn-yes:hover{filter:brightness(1.03); transform: translateY(-1px) scale(1.01)}
+
     .btn-no{
-  background: rgba(30,30,35,.08);
-  color:#222;
-  border:1px solid rgba(0,0,0,.08);
-  box-shadow: 0 14px 34px rgba(0,0,0,.08);
-  position:absolute;
-  padding: 14px 18px;
-}
+      background: rgba(30,30,35,.08);
+      color:#222;
+      border:1px solid rgba(0,0,0,.08);
+      box-shadow: 0 14px 34px rgba(0,0,0,.08);
+      position:absolute;
+      padding: 14px 18px;
+      opacity: 1;
+    }
     .btn-no:hover{transform: translateY(-1px)}
 
-    .btn-yes { transform: scale(1); transform-origin: left center; }
-    .btn-no  { transform: scale(1); transform-origin: center; }
+    /* ABSOLUTNIE KLUCZOWE: warstwy */
     #yes{
-  position: absolute;
-  left: 0;
-  bottom: 0;
-}
+      position: absolute;
+      left: 0;
+      bottom: 0;
+      z-index: 2;
+      transform-origin: left center;
+    }
+    #no{
+      z-index: 3; /* NIE zawsze nad TAK */
+      transform-origin: center;
+    }
 
-
-
-    #arena { overflow: hidden; }
-    
     .panel{
       display:flex;
       flex-direction:column;
@@ -202,12 +185,10 @@
     }
     .toast.show{opacity:1; transform: translateY(0px);}
 
-    /* Canvas warstwy */
     canvas{position:fixed; inset:0; pointer-events:none;}
     #confetti{z-index:6;}
     #hearts{z-index:2;}
 
-    /* Ekran końcowy */
     .final{
       position:fixed; inset:0;
       display:none;
@@ -269,7 +250,7 @@
         Kliknij, jak czujesz. Jeśli klikniesz „NIE”... cóż — system może nie zgodzić się z Twoją decyzją 😌
       </p>
 
-   <div class="btnrow" id="arena">
+      <div class="btnrow" id="arena">
         <button class="btn btn-yes" id="yes">TAK ❤️</button>
         <button class="btn btn-no" id="no">NIE 🙈</button>
       </div>
@@ -287,11 +268,9 @@
         Tip: „NIE” reaguje na zbliżenie kursora. To nie przypadek. To przeznaczenie.
       </p>
 
-     <button class="mutebtn" id="mute">🔇 Dźwięk: OFF</button>
+      <button class="mutebtn" id="mute">🔇 Dźwięk: OFF</button>
 
-      <p class="tip" style="opacity:.7;margin-top:auto;">
-      
-      </p>
+      <p class="tip" style="opacity:.7;margin-top:auto;"></p>
     </div>
   </div>
 
@@ -312,6 +291,7 @@
   // ======= Audio (bez plików, prosty “chime”) =======
   let audioEnabled = false;
   let audioCtx = null;
+
   function beep(freq=660, dur=0.08, type='sine', gain=0.06){
     if(!audioEnabled) return;
     if(!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -349,10 +329,9 @@
 
   let noCount = 0;
   let yesScale = 1.0;
-  let noScale = 1.0;
-  const YES_MAX = 1.4;     // maksymalna skala TAK
-  const YES_STEP = 0.055;  // ile rośnie za każdym razem
-  const NO_MIN  = 0.55;    // minimalna skala NIE
+
+  const YES_MAX  = 1.22;   // mniejsze = brak nachodzenia na NIE
+  const YES_STEP = 0.055;
 
   const taunts = [
     "Serio chcesz kliknąć „NIE”? 👀",
@@ -367,43 +346,37 @@
     toast.classList.add('show');
     setTimeout(()=>toast.classList.remove('show'), 900);
   }
-
   function clamp(v, a, b){ return Math.max(a, Math.min(b, v)); }
 
   function moveNoRandom(e){
-  no.style.right = "";
-  no.style.bottom = "";
-  const rect = arena.getBoundingClientRect();
-  const btnW = no.offsetWidth;
-  const btnH = no.offsetHeight;
+    no.style.right = "";
+    no.style.bottom = "";
 
-  const pad = 10;
+    const rect = arena.getBoundingClientRect();
+    const btnW = no.offsetWidth;
+    const btnH = no.offsetHeight;
+    const pad = 10;
 
-  // pozycja kursora w obrębie areny
-  const mx = e ? (e.clientX - rect.left) : rect.width / 2;
-  const my = e ? (e.clientY - rect.top)  : rect.height / 2;
+    const mx = e ? (e.clientX - rect.left) : rect.width / 2;
+    const my = e ? (e.clientY - rect.top)  : rect.height / 2;
 
-  const maxX = rect.width  - btnW - pad;
-  const maxY = rect.height - btnH - pad;
+    const maxX = rect.width  - btnW - pad;
+    const maxY = rect.height - btnH - pad;
 
-  // minimalny dystans od kursora (żeby nie pojawiał się pod myszą)
-  const minDist = 140; // zwiększ jeśli dalej “wpada pod kursor”
+    const minDist = 140;
 
-  let x, y, tries = 0;
+    let x, y, tries = 0;
+    do {
+      x = pad + Math.random() * (maxX - pad);
+      y = pad + Math.random() * (maxY - pad);
+      tries++;
+      if (tries > 30) break;
+    } while (Math.hypot(x - mx, y - my) < minDist);
 
-  do {
-    x = pad + Math.random() * (maxX - pad);
-    y = pad + Math.random() * (maxY - pad);
-    tries++;
-    // zabezpieczenie aby nie zapętlić się w małych ekranach
-    if (tries > 30) break;
-  } while (Math.hypot(x - mx, y - my) < minDist);
+    no.style.left = x + "px";
+    no.style.top  = y + "px";
+  }
 
-  no.style.left = x + "px";
-  no.style.top  = y + "px";
-}
-
-  // Ustaw początkowo „NIE” w obrębie areny
   function placeNoStart(){
     no.style.right = "";
     no.style.bottom = "";
@@ -414,202 +387,18 @@
   window.addEventListener('resize', placeNoStart);
   placeNoStart();
 
-// Startowe skale, żeby nie było „skoku” na pierwszym hover
-yes.style.transform = "scale(1)";
-no.style.transform  = "scale(1)";
+  // start bez „skoku”
+  yes.style.transform = "scale(1)";
+  no.style.transform  = "scale(1)";
+  no.style.opacity    = "1";
 
-  // Uciekanie na hover (bardziej “premium” niż click)
- let noCooldown = false;
+  // ======= Hover “NIE” =======
+  let noCooldown = false;
 
-no.addEventListener('pointerenter', (e) => {
-  if (noCooldown) return;
-  noCooldown = true;
-  setTimeout(() => noCooldown = false, 420); // tu możesz dać 300–600 ms
-  
+  no.addEventListener('pointerenter', (e) => {
+    if (noCooldown) return;
+    noCooldown = true;
+    setTimeout(() => noCooldown = false, 420);
+
     noCount++;
-    noCountEl.textContent = noCount;
-
-  // „Tak” rośnie, „Nie” maleje (z limitem i łagodnym startem)
-yesScale = Math.min(YES_MAX, yesScale + YES_STEP);
-
-const NO_STEP = (noCount < 3) ? 0.02 : 0.04; // wolniej na początku
-noScale = Math.max(NO_MIN, noScale - NO_STEP);
-
-yes.style.transform = `scale(${yesScale})`;
-no.style.transform  = `scale(${noScale})`;
-
-    // “szansa”
-    const chance = clamp(60 + noCount*8, 0, 100);
-    chanceEl.textContent = chance + "%";
-
-    showToast(taunts[noCount % taunts.length]);
-    status.textContent = `Wykryto próbę „NIE” (${noCount}). System rekomenduje „TAK”.`;
-
-    beep(220 + noCount*20, 0.06, 'square', 0.03);
-    moveNoRandom(e);
-
-    // Po kilku razach “NIE” zaczyna tracić sens
-    if (noCount >= 6) {
-  // stopniowo: 1.0 -> 0.25 w kilku krokach, ale nigdy “nagle”
-  const target = Math.max(0.25, 1 - (noCount - 6) * 0.12); 
-  no.style.opacity = target;
-
-  if (noCount === 6) no.textContent = "NIE...? 🤏";
-}
-    if(noCount >= 11){
-      no.style.display = "none";
-      showToast("„NIE” opuściło czat.");
-      status.textContent = "„NIE” zniknęło. Została jedyna słuszna opcja 😌";
-      beep(120,0.10,'triangle',0.04);
-    }
-  });
-
-  // Kliknięcie “NIE” — też niech coś robi
-no.addEventListener('click', (e) => {
-  e.preventDefault();
-  showToast("Nice try 😌");
-  moveNoRandom(e);
-  beep(160,0.07,'square',0.03);
-});
-
-  // ======= Serduszka w tle (canvas) =======
-  const heartsCanvas = document.getElementById('hearts');
-  const hctx = heartsCanvas.getContext('2d');
-  let hearts = [];
-
-  function resizeCanvas(c){
-    c.width = window.innerWidth * devicePixelRatio;
-    c.height = window.innerHeight * devicePixelRatio;
-    c.style.width = window.innerWidth + "px";
-    c.style.height = window.innerHeight + "px";
-    const ctx = c.getContext('2d');
-    ctx.setTransform(devicePixelRatio,0,0,devicePixelRatio,0,0);
-    return ctx;
-  }
-  resizeCanvas(heartsCanvas);
-  window.addEventListener('resize', () => resizeCanvas(heartsCanvas));
-
-  function spawnHeart(x=null, y=null){
-    const W = window.innerWidth;
-    const H = window.innerHeight;
-    hearts.push({
-      x: x ?? Math.random()*W,
-      y: y ?? (H + 20),
-      vy: 0.6 + Math.random()*1.6,
-      vx: (Math.random()-0.5)*0.8,
-      s: 8 + Math.random()*14,
-      a: 0.35 + Math.random()*0.35,
-      rot: (Math.random()-0.5)*0.8
-    });
-    if(hearts.length > 120) hearts.shift();
-  }
-
-  function drawHeart(ctx, x, y, size, alpha, rot){
-    ctx.save();
-    ctx.translate(x,y);
-    ctx.rotate(rot);
-    ctx.globalAlpha = alpha;
-    ctx.beginPath();
-    const s = size/16;
-    ctx.moveTo(0, -6*s);
-    ctx.bezierCurveTo( 10*s, -16*s,  24*s, -2*s,  0, 14*s);
-    ctx.bezierCurveTo(-24*s, -2*s, -10*s, -16*s, 0, -6*s);
-    ctx.closePath();
-    // gradient
-    const g = ctx.createLinearGradient(-size, -size, size, size);
-    g.addColorStop(0, "rgba(255,61,110,1)");
-    g.addColorStop(1, "rgba(124,58,237,1)");
-    ctx.fillStyle = g;
-    ctx.fill();
-    ctx.restore();
-  }
-
-  function heartsLoop(){
-    hctx.clearRect(0,0,window.innerWidth, window.innerHeight);
-    // spawn
-    if(Math.random() < 0.12) spawnHeart();
-    for(let i=hearts.length-1;i>=0;i--){
-      const p = hearts[i];
-      p.y -= p.vy;
-      p.x += p.vx;
-      p.rot += 0.004;
-      p.a *= 0.999;
-      drawHeart(hctx, p.x, p.y, p.s, p.a, p.rot);
-      if(p.y < -40 || p.a < 0.05) hearts.splice(i,1);
-    }
-    requestAnimationFrame(heartsLoop);
-  }
-  heartsLoop();
-
-  // ======= Confetti (canvas) =======
-  const confCanvas = document.getElementById('confetti');
-  const cctx = confCanvas.getContext('2d');
-  resizeCanvas(confCanvas);
-  window.addEventListener('resize', () => resizeCanvas(confCanvas));
-
-  let conf = [];
-  function burstConfetti(){
-    const W = window.innerWidth;
-    const H = window.innerHeight;
-    for(let i=0;i<180;i++){
-      conf.push({
-        x: W/2 + (Math.random()-0.5)*120,
-        y: H/2 + (Math.random()-0.5)*40,
-        vx: (Math.random()-0.5)*9,
-        vy: (Math.random()-0.8)*10,
-        g: 0.12 + Math.random()*0.12,
-        r: 2 + Math.random()*4,
-        a: 1,
-        rot: Math.random()*Math.PI
-      });
-    }
-  }
-
-  function confLoop(){
-    cctx.clearRect(0,0,window.innerWidth, window.innerHeight);
-    for(let i=conf.length-1;i>=0;i--){
-      const p = conf[i];
-      p.vy += p.g;
-      p.x += p.vx;
-      p.y += p.vy;
-      p.rot += 0.12;
-      p.a *= 0.992;
-
-      cctx.save();
-      cctx.translate(p.x,p.y);
-      cctx.rotate(p.rot);
-      cctx.globalAlpha = p.a;
-      cctx.fillStyle = (i % 3 === 0)
-        ? "rgba(255,61,110,1)"
-        : (i % 3 === 1) ? "rgba(124,58,237,1)" : "rgba(255,182,193,1)";
-      cctx.fillRect(-p.r, -p.r, p.r*2.2, p.r*1.2);
-      cctx.restore();
-
-      if(p.y > window.innerHeight + 40 || p.a < 0.05) conf.splice(i,1);
-    }
-    requestAnimationFrame(confLoop);
-  }
-  confLoop();
-
-  // ======= Klik “TAK” =======
-  yes.addEventListener('click', async () => {
-    // odblokuj audio na iOS (gest)
-    try{
-      if(!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-      if(audioCtx.state === 'suspended') await audioCtx.resume();
-    }catch{}
-
-    chime();
-    burstConfetti();
-    showToast("💘 Zatwierdzono!");
-    status.textContent = "TAK zostało przyjęte. Uruchamiam tryb Walentynkowy...";
-
-    setTimeout(() => {
-      final.style.display = "grid";
-    }, 700);
-  });
-
-})();
-</script>
-</body>
-</html>
+    noCountEl.textContent
