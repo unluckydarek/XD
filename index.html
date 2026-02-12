@@ -172,19 +172,22 @@
     }
 
     .toast{
-      position:absolute;
-      left: 18px;
-      bottom: 90px;   /* było 18px */
-      background: rgba(255,255,255,.75);
-      border:1px solid rgba(255,255,255,.8);
-      border-radius: 16px;
-      padding: 10px 12px;
-      font-size: 13px;
-      opacity: 0;
-      transform: translateY(8px);
-      transition: .25s ease;
-      pointer-events:none;
-    }
+  position:absolute;
+  left: 18px;
+  top: 18px;            /* było bottom */
+  bottom: auto;
+  background: rgba(255,255,255,.85);
+  border:1px solid rgba(255,255,255,.9);
+  border-radius: 16px;
+  padding: 10px 12px;
+  font-size: 13px;
+  opacity: 0;
+  transform: translateY(-8px);   /* było +8px */
+  transition: .25s ease;
+  pointer-events:none;
+  z-index: 5;
+}
+.toast.show{opacity:1; transform: translateY(0px);}
     .toast{
   position:absolute;
   left: 18px;
@@ -376,7 +379,7 @@ function showToast(msg){
   if (toastTimer) clearTimeout(toastTimer);
   toastTimer = setTimeout(() => {
     toast.classList.remove('show');
-  }, 1800); // było 900 – teraz ~1.8s (możesz dać 2200)
+  }, 2500); // było 900 – teraz ~1.8s (możesz dać 2200)
 }
   function clamp(v, a, b){ return Math.max(a, Math.min(b, v)); }
 
