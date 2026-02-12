@@ -1,0 +1,561 @@
+<!doctype html>
+<html lang="pl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Zostaniesz moją Walentynką?</title>
+  <style>
+    :root{
+      --bg1:#fff0f6;
+      --bg2:#ffd6e7;
+      --card:#ffffffcc;
+      --txt:#2b2b2b;
+      --accent:#ff3d6e;
+      --accent2:#7c3aed;
+      --shadow: 0 20px 60px rgba(0,0,0,.12);
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      min-height:100vh;
+      display:grid;
+      place-items:center;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial;
+      color:var(--txt);
+      background:
+        radial-gradient(1200px 700px at 20% 10%, #ffffff 0%, transparent 55%),
+        radial-gradient(900px 600px at 80% 20%, #ffe0f0 0%, transparent 60%),
+        linear-gradient(160deg, var(--bg1), var(--bg2));
+      overflow:hidden;
+    }
+
+    /* Subtelne “pływające” bokeh/serduszka */
+    .float{
+      position:absolute; inset:-20%;
+      pointer-events:none;
+      filter: blur(0.2px);
+      opacity:.45;
+      animation: drift 18s linear infinite;
+      background:
+        radial-gradient(circle at 10% 20%, rgba(255,61,110,.25) 0 8px, transparent 9px),
+        radial-gradient(circle at 30% 40%, rgba(124,58,237,.18) 0 10px, transparent 11px),
+        radial-gradient(circle at 60% 30%, rgba(255,61,110,.18) 0 12px, transparent 13px),
+        radial-gradient(circle at 80% 70%, rgba(124,58,237,.14) 0 9px, transparent 10px),
+        radial-gradient(circle at 50% 80%, rgba(255,61,110,.12) 0 14px, transparent 15px);
+      background-size: 420px 420px;
+    }
+    @keyframes drift{
+      from{transform:translate3d(-2%, -2%, 0) rotate(0deg)}
+      to{transform:translate3d(2%, 2%, 0) rotate(8deg)}
+    }
+
+    .wrap{
+      width:min(920px, 92vw);
+      padding: 22px;
+      display:grid;
+      grid-template-columns: 1.1fr 0.9fr;
+      gap: 18px;
+      align-items:stretch;
+    }
+    @media (max-width: 860px){
+      .wrap{grid-template-columns:1fr; }
+    }
+
+    .card{
+      background: var(--card);
+      border: 1px solid rgba(255,255,255,.55);
+      border-radius: 22px;
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(10px);
+      padding: 26px;
+      position:relative;
+      overflow:hidden;
+    }
+
+    .title{
+      font-size: clamp(28px, 4vw, 44px);
+      margin: 0 0 8px;
+      letter-spacing:-.02em;
+      line-height:1.05;
+    }
+    .subtitle{
+      margin: 0 0 16px;
+      opacity:.85;
+      font-size: 15px;
+    }
+
+    .badge{
+      display:inline-flex;
+      gap:10px;
+      align-items:center;
+      font-size:13px;
+      padding: 8px 12px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, .65);
+      border: 1px solid rgba(255,255,255,.7);
+      margin-bottom: 14px;
+    }
+    .dot{
+      width:10px;height:10px;border-radius:50%;
+      background: var(--accent);
+      box-shadow: 0 0 0 6px rgba(255,61,110,.18);
+      animation:pulse 1.8s infinite;
+    }
+    @keyframes pulse{
+      0%,100%{transform:scale(1); opacity:1}
+      50%{transform:scale(1.15); opacity:.85}
+    }
+
+    .btnrow{
+      display:flex;
+      gap: 12px;
+      flex-wrap:wrap;
+      margin-top: 18px;
+      align-items:center;
+      position:relative;
+    }
+    .btn{
+      border:0;
+      border-radius: 16px;
+      padding: 14px 18px;
+      font-size: 18px;
+      font-weight: 750;
+      letter-spacing:.01em;
+      cursor:pointer;
+      transition: transform .18s ease, box-shadow .18s ease, filter .18s ease;
+      user-select:none;
+      position:relative;
+    }
+    .btn:active{transform: translateY(1px) scale(.99)}
+    .btn-yes{
+      background: linear-gradient(135deg, var(--accent), #ff7aa5);
+      color:white;
+      box-shadow: 0 14px 34px rgba(255,61,110,.28);
+    }
+    .btn-yes:hover{filter:brightness(1.03); transform: translateY(-1px) scale(1.01)}
+    .btn-no{
+      background: rgba(30,30,35,.08);
+      color:#222;
+      border:1px solid rgba(0,0,0,.08);
+      box-shadow: 0 14px 34px rgba(0,0,0,.08);
+      position:absolute; /* będzie “uciekał” w obrębie prawej karty */
+      right: 26px;
+      bottom: 26px;
+    }
+    .btn-no:hover{transform: translateY(-1px)}
+
+    .panel{
+      display:flex;
+      flex-direction:column;
+      gap: 14px;
+    }
+
+    .stats{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+    .stat{
+      background: rgba(255,255,255,.55);
+      border:1px solid rgba(255,255,255,.7);
+      border-radius: 18px;
+      padding: 12px 14px;
+    }
+    .stat b{display:block; font-size: 18px;}
+    .stat span{opacity:.75; font-size: 12px;}
+
+    .tip{
+      margin:0;
+      font-size: 14px;
+      opacity:.85;
+      line-height:1.35;
+    }
+
+    .toast{
+      position:absolute;
+      left: 18px; bottom: 18px;
+      background: rgba(255,255,255,.75);
+      border:1px solid rgba(255,255,255,.8);
+      border-radius: 16px;
+      padding: 10px 12px;
+      font-size: 13px;
+      opacity: 0;
+      transform: translateY(8px);
+      transition: .25s ease;
+      pointer-events:none;
+    }
+    .toast.show{opacity:1; transform: translateY(0px);}
+
+    /* Canvas warstwy */
+    canvas{position:fixed; inset:0; pointer-events:none;}
+    #confetti{z-index:6;}
+    #hearts{z-index:2;}
+
+    /* Ekran końcowy */
+    .final{
+      position:fixed; inset:0;
+      display:none;
+      place-items:center;
+      z-index:10;
+      background: radial-gradient(900px 600px at 50% 30%, rgba(255,255,255,.9), rgba(255,255,255,.45));
+      backdrop-filter: blur(8px);
+      padding: 22px;
+      text-align:center;
+    }
+    .final .box{
+      width:min(760px, 92vw);
+      border-radius: 24px;
+      background: rgba(255,255,255,.75);
+      border:1px solid rgba(255,255,255,.85);
+      box-shadow: var(--shadow);
+      padding: 28px;
+    }
+    .final h2{
+      margin:0 0 10px;
+      font-size: clamp(28px, 4vw, 46px);
+    }
+    .final p{
+      margin:0 0 18px;
+      opacity:.85;
+      font-size: 15px;
+      line-height:1.4;
+    }
+    .final .small{
+      font-size: 12px;
+      opacity:.7;
+      margin-top: 10px;
+    }
+
+    .mutebtn{
+      border:0;
+      background: rgba(255,255,255,.55);
+      border:1px solid rgba(255,255,255,.8);
+      border-radius: 14px;
+      padding: 10px 12px;
+      cursor:pointer;
+      font-weight:650;
+      font-size: 13px;
+      opacity:.9;
+    }
+  </style>
+</head>
+<body>
+  <div class="float" aria-hidden="true"></div>
+  <canvas id="hearts"></canvas>
+  <canvas id="confetti"></canvas>
+
+  <div class="wrap">
+    <div class="card">
+      <div class="badge"><span class="dot"></span><span>Tryb premium: serce + chaos kontrolowany</span></div>
+      <h1 class="title">Czy zostaniesz moją Walentynką? 💘</h1>
+      <p class="subtitle">Uwaga: przycisk „NIE” posiada własny instynkt samozachowawczy.</p>
+
+      <p class="tip">
+        Kliknij, jak czujesz. Jeśli klikniesz „NIE”... cóż — system może nie zgodzić się z Twoją decyzją 😌
+      </p>
+
+      <div class="btnrow" id="arena" style="min-height:120px; margin-top:22px;">
+        <button class="btn btn-yes" id="yes">TAK ❤️</button>
+        <button class="btn btn-no" id="no">NIE 🙈</button>
+      </div>
+
+      <div class="toast" id="toast">👀</div>
+    </div>
+
+    <div class="card panel" id="side">
+      <div class="stats">
+        <div class="stat"><b id="noCount">0</b><span>prób kliknięcia „NIE”</span></div>
+        <div class="stat"><b id="chance">100%</b><span>szansa na „TAK”</span></div>
+      </div>
+
+      <p class="tip" id="status">
+        Tip: „NIE” reaguje na zbliżenie kursora. To nie przypadek. To przeznaczenie.
+      </p>
+
+      <button class="mutebtn" id="mute">🔊 Dźwięk: ON</button>
+
+      <p class="tip" style="opacity:.7;margin-top:auto;">
+        PS: Jeśli chcesz, mogę dopisać imię w pytaniu i drugi ekran z Waszym zdjęciem w tle.
+      </p>
+    </div>
+  </div>
+
+  <div class="final" id="final">
+    <div class="box">
+      <h2>Oficjalnie: jesteś moją Walentynką 💞</h2>
+      <p>
+        To jest ten moment, kiedy Internet mówi: <b>dobry wybór</b>.
+        <br/>Miłość zaakceptowana. Serduszka aktywowane.
+      </p>
+      <button class="btn btn-yes" onclick="location.reload()">Jeszcze raz 😄</button>
+      <div class="small">Tip: możesz zrobić screen i wysłać jako pamiątkę.</div>
+    </div>
+  </div>
+
+<script>
+(() => {
+  // ======= Audio (bez plików, prosty “chime”) =======
+  let audioEnabled = true;
+  let audioCtx = null;
+  function beep(freq=660, dur=0.08, type='sine', gain=0.06){
+    if(!audioEnabled) return;
+    if(!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    const o = audioCtx.createOscillator();
+    const g = audioCtx.createGain();
+    o.type = type;
+    o.frequency.value = freq;
+    g.gain.value = gain;
+    o.connect(g); g.connect(audioCtx.destination);
+    o.start();
+    o.stop(audioCtx.currentTime + dur);
+  }
+  function chime(){
+    beep(740,0.07,'sine',0.055);
+    setTimeout(()=>beep(880,0.08,'sine',0.055), 80);
+    setTimeout(()=>beep(990,0.10,'sine',0.055), 160);
+  }
+
+  const muteBtn = document.getElementById('mute');
+  muteBtn.addEventListener('click', () => {
+    audioEnabled = !audioEnabled;
+    muteBtn.textContent = audioEnabled ? "🔊 Dźwięk: ON" : "🔇 Dźwięk: OFF";
+    beep(420,0.06,'triangle',0.04);
+  });
+
+  // ======= UI / mechanika przycisków =======
+  const yes = document.getElementById('yes');
+  const no = document.getElementById('no');
+  const arena = document.getElementById('arena');
+  const toast = document.getElementById('toast');
+  const noCountEl = document.getElementById('noCount');
+  const chanceEl = document.getElementById('chance');
+  const status = document.getElementById('status');
+  const final = document.getElementById('final');
+
+  let noCount = 0;
+  let yesScale = 1.0;
+  let noScale = 1.0;
+
+  const taunts = [
+    "Serio chcesz kliknąć „NIE”? 👀",
+    "Przycisk „NIE” zgłasza sprzeciw proceduralny.",
+    "System miłości wykrył wahanie.",
+    "To już wygląda podejrzanie romantycznie…",
+    "Uwaga: „NIE” traci prawa obywatelskie."
+  ];
+
+  function showToast(msg){
+    toast.textContent = msg;
+    toast.classList.add('show');
+    setTimeout(()=>toast.classList.remove('show'), 900);
+  }
+
+  function clamp(v, a, b){ return Math.max(a, Math.min(b, v)); }
+
+  function moveNoRandom(){
+    const rect = arena.getBoundingClientRect();
+    const btn = no.getBoundingClientRect();
+    const pad = 8;
+    const maxX = rect.width - btn.width - pad;
+    const maxY = rect.height - btn.height - pad;
+
+    const x = clamp(Math.random()*maxX, pad, maxX);
+    const y = clamp(Math.random()*maxY, pad, maxY);
+
+    no.style.left = x + "px";
+    no.style.top  = y + "px";
+  }
+
+  // Ustaw początkowo „NIE” w obrębie areny
+  function placeNoStart(){
+    const r = arena.getBoundingClientRect();
+    no.style.left = (r.width - no.offsetWidth - 8) + "px";
+    no.style.top  = (r.height - no.offsetHeight - 8) + "px";
+  }
+  window.addEventListener('resize', placeNoStart);
+  placeNoStart();
+
+  // Uciekanie na hover (bardziej “premium” niż click)
+  no.addEventListener('mouseenter', () => {
+    noCount++;
+    noCountEl.textContent = noCount;
+
+    // „Tak” rośnie, „Nie” maleje
+    yesScale += 0.08;
+    noScale  -= 0.06;
+
+    yes.style.transform = `scale(${yesScale})`;
+    no.style.transform  = `scale(${Math.max(0.35, noScale)})`;
+
+    // “szansa”
+    const chance = clamp(60 + noCount*8, 0, 100);
+    chanceEl.textContent = chance + "%";
+
+    showToast(taunts[noCount % taunts.length]);
+    status.textContent = `Wykryto próbę „NIE” (${noCount}). System rekomenduje „TAK”.`;
+
+    beep(220 + noCount*20, 0.06, 'square', 0.03);
+    moveNoRandom();
+
+    // Po kilku razach “NIE” zaczyna tracić sens
+    if(noCount >= 8){
+      no.style.opacity = 0.15;
+      no.textContent = "NIE...? 🤏";
+    }
+    if(noCount >= 11){
+      no.style.display = "none";
+      showToast("„NIE” opuściło czat.");
+      status.textContent = "„NIE” zniknęło. Została jedyna słuszna opcja 😌";
+      beep(120,0.10,'triangle',0.04);
+    }
+  });
+
+  // Kliknięcie “NIE” — też niech coś robi
+  no.addEventListener('click', (e) => {
+    e.preventDefault();
+    showToast("Nice try 😌");
+    moveNoRandom();
+    beep(160,0.07,'square',0.03);
+  });
+
+  // ======= Serduszka w tle (canvas) =======
+  const heartsCanvas = document.getElementById('hearts');
+  const hctx = heartsCanvas.getContext('2d');
+  let hearts = [];
+
+  function resizeCanvas(c){
+    c.width = window.innerWidth * devicePixelRatio;
+    c.height = window.innerHeight * devicePixelRatio;
+    c.style.width = window.innerWidth + "px";
+    c.style.height = window.innerHeight + "px";
+    const ctx = c.getContext('2d');
+    ctx.setTransform(devicePixelRatio,0,0,devicePixelRatio,0,0);
+    return ctx;
+  }
+  resizeCanvas(heartsCanvas);
+  window.addEventListener('resize', () => resizeCanvas(heartsCanvas));
+
+  function spawnHeart(x=null, y=null){
+    const W = window.innerWidth;
+    const H = window.innerHeight;
+    hearts.push({
+      x: x ?? Math.random()*W,
+      y: y ?? (H + 20),
+      vy: 0.6 + Math.random()*1.6,
+      vx: (Math.random()-0.5)*0.8,
+      s: 8 + Math.random()*14,
+      a: 0.35 + Math.random()*0.35,
+      rot: (Math.random()-0.5)*0.8
+    });
+    if(hearts.length > 120) hearts.shift();
+  }
+
+  function drawHeart(ctx, x, y, size, alpha, rot){
+    ctx.save();
+    ctx.translate(x,y);
+    ctx.rotate(rot);
+    ctx.globalAlpha = alpha;
+    ctx.beginPath();
+    const s = size/16;
+    ctx.moveTo(0, -6*s);
+    ctx.bezierCurveTo( 10*s, -16*s,  24*s, -2*s,  0, 14*s);
+    ctx.bezierCurveTo(-24*s, -2*s, -10*s, -16*s, 0, -6*s);
+    ctx.closePath();
+    // gradient
+    const g = ctx.createLinearGradient(-size, -size, size, size);
+    g.addColorStop(0, "rgba(255,61,110,1)");
+    g.addColorStop(1, "rgba(124,58,237,1)");
+    ctx.fillStyle = g;
+    ctx.fill();
+    ctx.restore();
+  }
+
+  function heartsLoop(){
+    hctx.clearRect(0,0,window.innerWidth, window.innerHeight);
+    // spawn
+    if(Math.random() < 0.12) spawnHeart();
+    for(let i=hearts.length-1;i>=0;i--){
+      const p = hearts[i];
+      p.y -= p.vy;
+      p.x += p.vx;
+      p.rot += 0.004;
+      p.a *= 0.999;
+      drawHeart(hctx, p.x, p.y, p.s, p.a, p.rot);
+      if(p.y < -40 || p.a < 0.05) hearts.splice(i,1);
+    }
+    requestAnimationFrame(heartsLoop);
+  }
+  heartsLoop();
+
+  // ======= Confetti (canvas) =======
+  const confCanvas = document.getElementById('confetti');
+  const cctx = confCanvas.getContext('2d');
+  resizeCanvas(confCanvas);
+  window.addEventListener('resize', () => resizeCanvas(confCanvas));
+
+  let conf = [];
+  function burstConfetti(){
+    const W = window.innerWidth;
+    const H = window.innerHeight;
+    for(let i=0;i<180;i++){
+      conf.push({
+        x: W/2 + (Math.random()-0.5)*120,
+        y: H/2 + (Math.random()-0.5)*40,
+        vx: (Math.random()-0.5)*9,
+        vy: (Math.random()-0.8)*10,
+        g: 0.12 + Math.random()*0.12,
+        r: 2 + Math.random()*4,
+        a: 1,
+        rot: Math.random()*Math.PI
+      });
+    }
+  }
+
+  function confLoop(){
+    cctx.clearRect(0,0,window.innerWidth, window.innerHeight);
+    for(let i=conf.length-1;i>=0;i--){
+      const p = conf[i];
+      p.vy += p.g;
+      p.x += p.vx;
+      p.y += p.vy;
+      p.rot += 0.12;
+      p.a *= 0.992;
+
+      cctx.save();
+      cctx.translate(p.x,p.y);
+      cctx.rotate(p.rot);
+      cctx.globalAlpha = p.a;
+      cctx.fillStyle = (i % 3 === 0)
+        ? "rgba(255,61,110,1)"
+        : (i % 3 === 1) ? "rgba(124,58,237,1)" : "rgba(255,182,193,1)";
+      cctx.fillRect(-p.r, -p.r, p.r*2.2, p.r*1.2);
+      cctx.restore();
+
+      if(p.y > window.innerHeight + 40 || p.a < 0.05) conf.splice(i,1);
+    }
+    requestAnimationFrame(confLoop);
+  }
+  confLoop();
+
+  // ======= Klik “TAK” =======
+  yes.addEventListener('click', async () => {
+    // odblokuj audio na iOS (gest)
+    try{
+      if(!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      if(audioCtx.state === 'suspended') await audioCtx.resume();
+    }catch{}
+
+    chime();
+    burstConfetti();
+    showToast("💘 Zatwierdzono!");
+    status.textContent = "TAK zostało przyjęte. Uruchamiam tryb Walentynkowy...";
+
+    setTimeout(() => {
+      final.style.display = "grid";
+    }, 700);
+  });
+
+})();
+</script>
+</body>
+</html>
