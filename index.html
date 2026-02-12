@@ -125,6 +125,12 @@
       transition: transform .18s ease, box-shadow .18s ease, filter .18s ease;
       user-select:none;
       position:relative;
+      line-height: 1;            /* kluczowe */
+      display: inline-flex;      /* lepsze układanie tekstu+emoji */
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      
     }
     .btn:active{transform: translateY(1px) scale(.99)}
     .btn-yes{
@@ -141,6 +147,7 @@
       position:absolute; /* będzie “uciekał” w obrębie prawej karty */
       right: 26px;
       bottom: 26px;
+      padding: 14px 18px;        /* zostaje, ale przy flex jest stabilniej */
     }
     .btn-no:hover{transform: translateY(-1px)}
 
@@ -341,7 +348,7 @@
   let noScale = 1.0;
   const YES_MAX = 1.4;     // maksymalna skala TAK
   const YES_STEP = 0.055;  // ile rośnie za każdym razem
-  const NO_MIN  = 0.45;    // minimalna skala NIE
+  const NO_MIN  = 0.55;    // minimalna skala NIE
 
   const taunts = [
     "Serio chcesz kliknąć „NIE”? 👀",
@@ -417,7 +424,7 @@ no.addEventListener('pointerenter', (e) => {
   // „Tak” rośnie, „Nie” maleje (z limitem i łagodnym startem)
 yesScale = Math.min(YES_MAX, yesScale + YES_STEP);
 
-const NO_STEP = (noCount < 3) ? 0.03 : 0.06; // wolniej na początku
+const NO_STEP = (noCount < 3) ? 0.02 : 0.04; // wolniej na początku
 noScale = Math.max(NO_MIN, noScale - NO_STEP);
 
 yes.style.transform = `scale(${yesScale})`;
@@ -434,10 +441,13 @@ no.style.transform  = `scale(${noScale})`;
     moveNoRandom(e);
 
     // Po kilku razach “NIE” zaczyna tracić sens
-    if(noCount >= 8){
-      no.style.opacity = 0.15;
-      no.textContent = "NIE...? 🤏";
-    }
+    if (noCount >= 6) {
+  // stopniowo: 1.0 -> 0.25 w kilku krokach, ale nigdy “nagle”
+  const target = Math.max(0.25, 1 - (noCount - 6) * 0.12); 
+  no.style.opacity = target;
+
+  if (noCount === 6) no.textContent = "NIE...? 🤏";
+}
     if(noCount >= 11){
       no.style.display = "none";
       showToast("„NIE” opuściło czat.");
