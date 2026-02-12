@@ -401,4 +401,184 @@
     setTimeout(() => noCooldown = false, 420);
 
     noCount++;
-    noCountEl.textContent
+    noCountEl.textContent = noCount;
+
+    // TAK rośnie, ale z limitem
+    yesScale = Math.min(YES_MAX, yesScale + YES_STEP);
+    yes.style.transform = `scale(${yesScale})`;
+
+    // “szansa”
+    const chance = clamp(60 + noCount*8, 0, 100);
+    chanceEl.textContent = chance + "%";
+
+    showToast(taunts[noCount % taunts.length]);
+    status.textContent = `Wykryto próbę „NIE” (${noCount}). System rekomenduje „TAK”.`;
+
+    beep(220 + noCount*20, 0.06, 'square', 0.03);
+    moveNoRandom(e);
+
+    // płynne znikanie NIE (bez dziwnych skoków)
+    if (noCount === 6) {
+      no.textContent = "NIE...? 🤏";
+    }
+    if (noCount >= 8)  no.style.opacity = "0.6";
+    if (noCount >= 10) no.style.opacity = "0.3";
+
+    if (noCount >= 11) {
+      no.style.opacity = "0";
+      showToast("„NIE” opuściło czat.");
+      status.textContent = "„NIE” zniknęło. Została jedyna słuszna opcja 😌";
+      beep(120,0.10,'triangle',0.04);
+
+      setTimeout(() => {
+        no.style.display = "none";
+      }, 300);
+    }
+  });
+
+  // Klik “NIE”
+  no.addEventListener('click', (e) => {
+    e.preventDefault();
+    showToast("Nice try 😌");
+    moveNoRandom(e);
+    beep(160,0.07,'square',0.03);
+  });
+
+  // ======= Serduszka w tle (canvas) =======
+  const heartsCanvas = document.getElementById('hearts');
+  const hctx = heartsCanvas.getContext('2d');
+  let hearts = [];
+
+  function resizeCanvas(c){
+    c.width = window.innerWidth * devicePixelRatio;
+    c.height = window.innerHeight * devicePixelRatio;
+    c.style.width = window.innerWidth + "px";
+    c.style.height = window.innerHeight + "px";
+    const ctx = c.getContext('2d');
+    ctx.setTransform(devicePixelRatio,0,0,devicePixelRatio,0,0);
+    return ctx;
+  }
+  resizeCanvas(heartsCanvas);
+  window.addEventListener('resize', () => resizeCanvas(heartsCanvas));
+
+  function spawnHeart(x=null, y=null){
+    const W = window.innerWidth;
+    const H = window.innerHeight;
+    hearts.push({
+      x: x ?? Math.random()*W,
+      y: y ?? (H + 20),
+      vy: 0.6 + Math.random()*1.6,
+      vx: (Math.random()-0.5)*0.8,
+      s: 8 + Math.random()*14,
+      a: 0.35 + Math.random()*0.35,
+      rot: (Math.random()-0.5)*0.8
+    });
+    if(hearts.length > 120) hearts.shift();
+  }
+
+  function drawHeart(ctx, x, y, size, alpha, rot){
+    ctx.save();
+    ctx.translate(x,y);
+    ctx.rotate(rot);
+    ctx.globalAlpha = alpha;
+    ctx.beginPath();
+    const s = size/16;
+    ctx.moveTo(0, -6*s);
+    ctx.bezierCurveTo( 10*s, -16*s,  24*s, -2*s,  0, 14*s);
+    ctx.bezierCurveTo(-24*s, -2*s, -10*s, -16*s, 0, -6*s);
+    ctx.closePath();
+    const g = ctx.createLinearGradient(-size, -size, size, size);
+    g.addColorStop(0, "rgba(255,61,110,1)");
+    g.addColorStop(1, "rgba(124,58,237,1)");
+    ctx.fillStyle = g;
+    ctx.fill();
+    ctx.restore();
+  }
+
+  function heartsLoop(){
+    hctx.clearRect(0,0,window.innerWidth, window.innerHeight);
+    if(Math.random() < 0.12) spawnHeart();
+    for(let i=hearts.length-1;i>=0;i--){
+      const p = hearts[i];
+      p.y -= p.vy;
+      p.x += p.vx;
+      p.rot += 0.004;
+      p.a *= 0.999;
+      drawHeart(hctx, p.x, p.y, p.s, p.a, p.rot);
+      if(p.y < -40 || p.a < 0.05) hearts.splice(i,1);
+    }
+    requestAnimationFrame(heartsLoop);
+  }
+  heartsLoop();
+
+  // ======= Confetti (canvas) =======
+  const confCanvas = document.getElementById('confetti');
+  const cctx = confCanvas.getContext('2d');
+  resizeCanvas(confCanvas);
+  window.addEventListener('resize', () => resizeCanvas(confCanvas));
+
+  let conf = [];
+  function burstConfetti(){
+    const W = window.innerWidth;
+    const H = window.innerHeight;
+    for(let i=0;i<180;i++){
+      conf.push({
+        x: W/2 + (Math.random()-0.5)*120,
+        y: H/2 + (Math.random()-0.5)*40,
+        vx: (Math.random()-0.5)*9,
+        vy: (Math.random()-0.8)*10,
+        g: 0.12 + Math.random()*0.12,
+        r: 2 + Math.random()*4,
+        a: 1,
+        rot: Math.random()*Math.PI
+      });
+    }
+  }
+
+  function confLoop(){
+    cctx.clearRect(0,0,window.innerWidth, window.innerHeight);
+    for(let i=conf.length-1;i>=0;i--){
+      const p = conf[i];
+      p.vy += p.g;
+      p.x += p.vx;
+      p.y += p.vy;
+      p.rot += 0.12;
+      p.a *= 0.992;
+
+      cctx.save();
+      cctx.translate(p.x,p.y);
+      cctx.rotate(p.rot);
+      cctx.globalAlpha = p.a;
+      cctx.fillStyle = (i % 3 === 0)
+        ? "rgba(255,61,110,1)"
+        : (i % 3 === 1) ? "rgba(124,58,237,1)" : "rgba(255,182,193,1)";
+      cctx.fillRect(-p.r, -p.r, p.r*2.2, p.r*1.2);
+      cctx.restore();
+
+      if(p.y > window.innerHeight + 40 || p.a < 0.05) conf.splice(i,1);
+    }
+    requestAnimationFrame(confLoop);
+  }
+  confLoop();
+
+  // ======= Klik “TAK” =======
+  yes.addEventListener('click', async () => {
+    try{
+      if(!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      if(audioCtx.state === 'suspended') await audioCtx.resume();
+    }catch{}
+
+    chime();
+    burstConfetti();
+    showToast("💘 Zatwierdzono!");
+    status.textContent = "TAK zostało przyjęte. Uruchamiam tryb Walentynkowy...";
+
+    setTimeout(() => {
+      final.style.display = "grid";
+    }, 700);
+  });
+
+})();
+</script>
+</body>
+</html>
