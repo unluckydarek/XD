@@ -113,9 +113,10 @@
     .btn:active{transform: translateY(1px) scale(.99)}
 
     .btn-yes{
-      background: linear-gradient(135deg, var(--accent), #ff7aa5);
-      color:white;
-      box-shadow: 0 14px 34px rgba(255,61,110,.28);
+     background: linear-gradient(135deg, var(--accent), #ff7aa5);
+  color:white;
+  box-shadow: 0 14px 34px rgba(255,61,110,.28);
+  transform-origin: left bottom;
     }
     .btn-yes:hover{filter:brightness(1.03); transform: translateY(-1px) scale(1.01)}
 
@@ -133,10 +134,10 @@
     /* ABSOLUTNIE KLUCZOWE: warstwy */
     #yes{
       position: absolute;
-      left: 0;
-      bottom: 0;
+      left: 16px;
+      bottom: 16px;
       z-index: 2;
-      transform-origin: left center;
+      transform-origin: left bottom;
     }
     #no{
       z-index: 3; /* NIE zawsze nad TAK */
