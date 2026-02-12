@@ -171,32 +171,25 @@
       line-height:1.35;
     }
 
-    .toast{
-  position:absolute;
-  top: 20px;
-  left: 50%;
-  transform: translate(-50%, -12px);
-  max-width: 70%;
-  width: max-content;         /* kluczowe */
-  background: rgba(255,255,255,.95);
+ .toast{
+  position: relative;      /* już nie absolute */
+  margin-top: auto;        /* przykleja do dołu panelu */
+  background: rgba(255,255,255,.9);
   border:1px solid rgba(0,0,0,.06);
   border-radius: 14px;
-  padding: 10px 16px;
+  padding: 10px 14px;
   font-size: 14px;
   font-weight: 500;
   opacity: 0;
+  transform: translateY(10px);
   transition: .3s ease;
   pointer-events:none;
-  z-index: 20;
   box-shadow: 0 10px 25px rgba(0,0,0,.08);
 }
+
 .toast.show{
   opacity:1;
-  transform: translate(-50%, 0);
-}
-.toast.show{
-  opacity:1;
-  transform: translateY(0px);
+  transform: translateY(0);
 }
 
     canvas{position:fixed; inset:0; pointer-events:none;}
@@ -269,13 +262,14 @@
         <button class="btn btn-no" id="no">NIE 🙈</button>
       </div>
 
-      <div class="toast" id="toast">👀</div>
+     
     </div>
 
     <div class="card panel" id="side">
       <div class="stats">
         <div class="stat"><b id="noCount">0</b><span>prób kliknięcia „NIE”</span></div>
         <div class="stat"><b id="chance">100%</b><span>szansa na „TAK”</span></div>
+        <div class="toast" id="toast">👀</div>
       </div>
 
       <p class="tip" id="status">
