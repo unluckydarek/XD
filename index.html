@@ -339,7 +339,7 @@
   let noCount = 0;
   let yesScale = 1.0;
 
-  const YES_MAX  = 1.22;   // mniejsze = brak nachodzenia na NIE
+  const YES_MAX  = 3;   // mniejsze = brak nachodzenia na NIE
   const YES_STEP = 0.055;
 
   const taunts = [
@@ -419,7 +419,7 @@ function showToast(msg){
     noCountEl.textContent = noCount;
 
     // TAK rośnie, ale z limitem
-    yesScale = Math.min(YES_MAX, yesScale + YES_STEP);
+    yesScale += YES_STEP;
     yes.style.transform = `scale(${yesScale})`;
 
     // “szansa”
