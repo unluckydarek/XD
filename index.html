@@ -252,6 +252,18 @@
       font-size: 13px;
       opacity:.9;
     }
+    @keyframes heartbeat {
+  0%   { transform: scale(1); }
+  15%  { transform: scale(1.15); }
+  30%  { transform: scale(1); }
+  45%  { transform: scale(1.12); }
+  60%  { transform: scale(1); }
+  100% { transform: scale(1); }
+}
+
+.heart-pulse {
+  animation: heartbeat 1.2s infinite;
+}
   </style>
 </head>
 <body>
@@ -442,13 +454,17 @@
     if (noCount >= 8)  no.style.opacity = "0.6";
     if (noCount >= 10) no.style.opacity = "0.3";
 
-    if (noCount >= 11) {
-      no.style.opacity = "0";
-      showToast("„NIE” zrobiło ragequit.");
-      status.textContent = "UPSSSS „NIE” zniknęło, teraz nie masz wyboru 😌";
-      beep(120,0.10,'triangle',0.04);
-      setTimeout(() => { no.style.display = "none"; }, 300);
-    }
+  if (noCount >= 11) {
+  no.style.opacity = "0";
+  showToast("„NIE” zrobiło ragequit.");
+  status.textContent = "UPSSSS „NIE” zniknęło, teraz nie masz wyboru 😌";
+  beep(120,0.10,'triangle',0.04);
+
+  setTimeout(() => {
+    no.style.display = "none";
+    yes.classList.add("heart-pulse"); // ❤️ zaczyna bić
+  }, 300);
+}
   });
 
   no.addEventListener('click', (e) => {
