@@ -29,7 +29,6 @@
       overflow:hidden;
     }
 
-    /* Subtelne “pływające” bokeh/serduszka */
     .float{
       position:absolute; inset:-20%;
       pointer-events:none;
@@ -87,9 +86,9 @@
     .btnrow{
       position: relative;
       margin-top: 22px;
-      min-height: 170px;   /* było 120px */
+      min-height: 170px;
       display: block;
-      overflow: hidden; /* ważne: uciekające NIE nie wyjdzie poza arenę */
+      overflow: hidden;
     }
 
     .btn{
@@ -113,10 +112,10 @@
     .btn:active{transform: translateY(1px) scale(.99)}
 
     .btn-yes{
-     background: linear-gradient(135deg, var(--accent), #ff7aa5);
-  color:white;
-  box-shadow: 0 14px 34px rgba(255,61,110,.28);
-  transform-origin: left bottom;
+      background: linear-gradient(135deg, var(--accent), #ff7aa5);
+      color:white;
+      box-shadow: 0 14px 34px rgba(255,61,110,.28);
+      transform-origin: left bottom;
     }
     .btn-yes:hover{filter:brightness(1.03); transform: translateY(-1px) scale(1.01)}
 
@@ -131,7 +130,6 @@
     }
     .btn-no:hover{transform: translateY(-1px)}
 
-    /* ABSOLUTNIE KLUCZOWE: warstwy */
     #yes{
       position: absolute;
       left: 16px;
@@ -140,7 +138,7 @@
       transform-origin: left bottom;
     }
     #no{
-      z-index: 3; /* NIE zawsze nad TAK */
+      z-index: 3;
       transform-origin: center;
     }
 
@@ -171,26 +169,25 @@
       line-height:1.35;
     }
 
- .toast{
-  position: relative;      /* już nie absolute */
-  margin-top: auto;        /* przykleja do dołu panelu */
-  background: rgba(255,255,255,.9);
-  border:1px solid rgba(0,0,0,.06);
-  border-radius: 14px;
-  padding: 10px 14px;
-  font-size: 14px;
-  font-weight: 500;
-  opacity: 0;
-  transform: translateY(10px);
-  transition: .3s ease;
-  pointer-events:none;
-  box-shadow: 0 10px 25px rgba(0,0,0,.08);
-}
-
-.toast.show{
-  opacity:1;
-  transform: translateY(0);
-}
+    .toast{
+      position: relative;
+      margin-top: auto;
+      background: rgba(255,255,255,.9);
+      border:1px solid rgba(0,0,0,.06);
+      border-radius: 14px;
+      padding: 10px 14px;
+      font-size: 14px;
+      font-weight: 500;
+      opacity: 0;
+      transform: translateY(10px);
+      transition: .3s ease;
+      pointer-events:none;
+      box-shadow: 0 10px 25px rgba(0,0,0,.08);
+    }
+    .toast.show{
+      opacity:1;
+      transform: translateY(0);
+    }
 
     canvas{position:fixed; inset:0; pointer-events:none;}
     #confetti{z-index:6;}
@@ -205,16 +202,29 @@
       backdrop-filter: blur(8px);
       padding: 22px;
       text-align:center;
+
+      opacity: 0;
+      transition: opacity .45s ease;
     }
+    .final.show { opacity: 1; }
+
     .final .box{
       width:min(760px, 92vw);
       border-radius: 24px;
       background: rgba(255,255,255,.75);
       border:1px solid rgba(255,255,255,.85);
-      box-shadow: var(--shadow);
       padding: 28px;
-      
+
+      transform: translateY(16px) scale(.96);
+      opacity: 0;
+      transition: transform .55s cubic-bezier(.2,1,.2,1), opacity .55s ease;
+      box-shadow: 0 30px 90px rgba(255,61,110,.22);
     }
+    .final.show .box{
+      transform: translateY(0) scale(1);
+      opacity: 1;
+    }
+
     .final h2{
       margin:0 0 10px;
       font-size: clamp(28px, 4vw, 46px);
@@ -230,19 +240,6 @@
       opacity:.7;
       margin-top: 10px;
     }
-    .final { opacity: 0; transition: opacity .45s ease; }
-.final.show { opacity: 1; }
-
-.final .box{
-  transform: translateY(16px) scale(.96);
-  opacity: 0;
-  transition: transform .55s cubic-bezier(.2,1,.2,1), opacity .55s ease;
-  box-shadow: 0 30px 90px rgba(255,61,110,.22);
-}
-.final.show .box{
-  transform: translateY(0) scale(1);
-  opacity: 1;
-}
 
     .mutebtn{
       border:0;
@@ -264,19 +261,17 @@
 
   <div class="wrap">
     <div class="card">
-      <h1 class="title">Jula, czy zostaniesz moją Walentynką?💘</h1>
-      <p class="subtitle">Mała wskazówka: jeden z przycisków ucieka jak przeciwnicy na aramach 😌.</p>
+      <h1 class="title">Jula, czy zostaniesz moją Walentynką? 💘</h1>
+      <p class="subtitle">Mała wskazówka: jeden z przycisków ucieka jak przeciwnicy na ARAM-ach 😌.</p>
 
       <p class="tip">
-        Możesz wybrać dowolną opcję, teoretycznie 😌😌😌
+        Możesz wybrać dowolną opcję… teoretycznie 😌😌😌
       </p>
 
       <div class="btnrow" id="arena">
         <button class="btn btn-yes" id="yes">TAK ❤️</button>
         <button class="btn btn-no" id="no">NIE 🥺</button>
       </div>
-
-     
     </div>
 
     <div class="card panel" id="side">
@@ -285,15 +280,11 @@
         <div class="stat"><b id="chance">100%</b><span>szansa na „TAK”</span></div>
       </div>
 
-      <p class="tip" id="status">
-        Tu są statystki, nie przejmuj się nimi ❤️
-      </p>
+      <p class="tip" id="status">Tu są statystyki, nie przejmuj się nimi ❤️</p>
 
       <button class="mutebtn" id="mute">🔇 Dźwięk: OFF</button>
-      <div>
-      <div class="toast" id="toast">👀</div>
 
-      <p class="tip" style="opacity:.7;margin-top:auto;"></p>
+      <div class="toast" id="toast">👀</div>
     </div>
   </div>
 
@@ -302,7 +293,7 @@
       <h2>Oficjalnie zostałaś moją Walentynką 💞</h2>
       <p>
         Gratulacje Jula, właśnie aktywowałaś tryb: <b>„Darek + 100 do szczęścia” ✨</b>.
-        <br/>Miłość zaakceptowana. Reklamacji nie przyjmuje 👀💞
+        <br/>Miłość zaakceptowana. Reklamacji nie przyjmuję 👀💞
       </p>
       <button class="btn btn-yes" onclick="location.reload()">Jeszcze raz 😼</button>
       <div class="small">Love you</div>
@@ -311,7 +302,7 @@
 
 <script>
 (() => {
-  // ======= Audio (bez plików, prosty “chime”) =======
+  // ======= Audio =======
   let audioEnabled = false;
   let audioCtx = null;
 
@@ -327,13 +318,14 @@
     o.start();
     o.stop(audioCtx.currentTime + dur);
   }
+
   function chime(){
-  beep(740,0.08,'sine',0.055);
-  setTimeout(()=>beep(880,0.09,'sine',0.055), 90);
-  setTimeout(()=>beep(990,0.12,'sine',0.055), 190);
-  setTimeout(()=>beep(1180,0.12,'triangle',0.05), 340);
-  setTimeout(()=>beep(1320,0.14,'triangle',0.045), 520);
-}
+    beep(740,0.08,'sine',0.055);
+    setTimeout(()=>beep(880,0.09,'sine',0.055), 90);
+    setTimeout(()=>beep(990,0.12,'sine',0.055), 190);
+    setTimeout(()=>beep(1180,0.12,'triangle',0.05), 340);
+    setTimeout(()=>beep(1320,0.14,'triangle',0.045), 520);
+  }
 
   const muteBtn = document.getElementById('mute');
   muteBtn.addEventListener('click', () => {
@@ -342,7 +334,7 @@
     beep(420,0.06,'triangle',0.04);
   });
 
-  // ======= UI / mechanika przycisków =======
+  // ======= UI =======
   const yes = document.getElementById('yes');
   const no = document.getElementById('no');
   const arena = document.getElementById('arena');
@@ -355,7 +347,7 @@
   let noCount = 0;
   let yesScale = 1.0;
 
-  const YES_MAX  = 5;   // mniejsze = brak nachodzenia na NIE
+  const YES_MAX  = 5;
   const YES_STEP = 0.2;
 
   const taunts = [
@@ -369,17 +361,14 @@
     "Darek udaje spokój, ale to trudne 😅"
   ];
 
- let toastTimer = null;
+  let toastTimer = null;
+  function showToast(msg){
+    toast.textContent = msg;
+    toast.classList.add('show');
+    if (toastTimer) clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => toast.classList.remove('show'), 2500);
+  }
 
-function showToast(msg){
-  toast.textContent = msg;
-  toast.classList.add('show');
-
-  if (toastTimer) clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => {
-    toast.classList.remove('show');
-  }, 2500); // było 900 – teraz ~1.8s (możesz dać 2200)
-}
   function clamp(v, a, b){ return Math.max(a, Math.min(b, v)); }
 
   function moveNoRandom(e){
@@ -437,11 +426,9 @@ function showToast(msg){
     noCount++;
     noCountEl.textContent = noCount;
 
-    // TAK rośnie, ale z limitem
-    yesScale += YES_STEP;
+    yesScale = Math.min(YES_MAX, yesScale + YES_STEP);
     yes.style.transform = `scale(${yesScale})`;
 
-    // “szansa”
     const chance = clamp(60 + noCount*8, 0, 100);
     chanceEl.textContent = chance + "%";
 
@@ -451,10 +438,7 @@ function showToast(msg){
     beep(220 + noCount*20, 0.06, 'square', 0.03);
     moveNoRandom(e);
 
-    // płynne znikanie NIE (bez dziwnych skoków)
-    if (noCount === 6) {
-      no.textContent = "NIE...? 😏";
-    }
+    if (noCount === 6) no.textContent = "NIE...? 😏";
     if (noCount >= 8)  no.style.opacity = "0.6";
     if (noCount >= 10) no.style.opacity = "0.3";
 
@@ -463,14 +447,10 @@ function showToast(msg){
       showToast("„NIE” zrobiło ragequit.");
       status.textContent = "UPSSSS „NIE” zniknęło, teraz nie masz wyboru 😌";
       beep(120,0.10,'triangle',0.04);
-
-      setTimeout(() => {
-        no.style.display = "none";
-      }, 300);
+      setTimeout(() => { no.style.display = "none"; }, 300);
     }
   });
 
-  // Klik “NIE”
   no.addEventListener('click', (e) => {
     e.preventDefault();
     showToast("Nice try 😌");
@@ -495,21 +475,7 @@ function showToast(msg){
   resizeCanvas(heartsCanvas);
   window.addEventListener('resize', () => resizeCanvas(heartsCanvas));
 
-  function spawnHeart(x=null, y=null)
-  function heartBurst(amount = 34)
-  setTimeout(() => heartBurst(26), 250);
-  setTimeout(() => heartBurst(20), 520);
-  {
-  const W = window.innerWidth;
-  const H = window.innerHeight;
-  for(let i=0;i<amount;i++){
-    spawnHeart(
-      W/2 + (Math.random()-0.5)*260,
-      H/2 + (Math.random()-0.5)*120
-    );
-  }
-}
-  {
+  function spawnHeart(x=null, y=null){
     const W = window.innerWidth;
     const H = window.innerHeight;
     hearts.push({
@@ -521,7 +487,18 @@ function showToast(msg){
       a: 0.35 + Math.random()*0.35,
       rot: (Math.random()-0.5)*0.8
     });
-    if(hearts.length > 120) hearts.shift();
+    if(hearts.length > 160) hearts.shift();
+  }
+
+  function heartBurst(amount = 34){
+    const W = window.innerWidth;
+    const H = window.innerHeight;
+    for(let i=0;i<amount;i++){
+      spawnHeart(
+        W/2 + (Math.random()-0.5)*260,
+        H/2 + (Math.random()-0.5)*120
+      );
+    }
   }
 
   function drawHeart(ctx, x, y, size, alpha, rot){
@@ -567,21 +544,21 @@ function showToast(msg){
 
   let conf = [];
   function burstConfetti(amount = 320, power = 11){
-  const W = window.innerWidth;
-  const H = window.innerHeight;
-  for(let i=0;i<amount;i++){
-    conf.push({
-      x: W/2 + (Math.random()-0.5)*160,
-      y: H/2 + (Math.random()-0.5)*60,
-      vx: (Math.random()-0.5)*power,
-      vy: (Math.random()-0.9)*power,
-      g: 0.10 + Math.random()*0.10,
-      r: 2 + Math.random()*5,
-      a: 1,
-      rot: Math.random()*Math.PI
-    });
+    const W = window.innerWidth;
+    const H = window.innerHeight;
+    for(let i=0;i<amount;i++){
+      conf.push({
+        x: W/2 + (Math.random()-0.5)*160,
+        y: H/2 + (Math.random()-0.5)*60,
+        vx: (Math.random()-0.5)*power,
+        vy: (Math.random()-0.9)*power,
+        g: 0.10 + Math.random()*0.10,
+        r: 2 + Math.random()*5,
+        a: 1,
+        rot: Math.random()*Math.PI
+      });
+    }
   }
-}
 
   function confLoop(){
     cctx.clearRect(0,0,window.innerWidth, window.innerHeight);
@@ -617,9 +594,17 @@ function showToast(msg){
     }catch{}
 
     chime();
+
+    // WOW: confetti w falach
     burstConfetti(320, 12);
     setTimeout(() => burstConfetti(220, 10), 220);
     setTimeout(() => burstConfetti(160, 9), 520);
+
+    // WOW: fala serc
+    heartBurst(34);
+    setTimeout(() => heartBurst(26), 250);
+    setTimeout(() => heartBurst(20), 520);
+
     showToast("💘 Zatwierdzono!");
     status.textContent = "TAK zostało przyjęte. Uruchamiam tryb Walentynkowy...";
 
